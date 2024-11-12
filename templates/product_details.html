@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card border-0" style="background: rgba(0, 0, 0, 0.5); color: #ffffff;">
+        <img src="{{ product.image }}" class="card-img-top img-fluid" alt="{{ product.name }}" style="max-height: 500px; object-fit: contain;">
+        <div class="card-body">
+            <h1 class="card-title" style="color: #ffffff;">{{ product.name }}</h1>
+            <h3 class="text-warning">Цена: {{ product.price }} ₽</h3>
+            <p class="card-text" style="color: #e0e0e0;">{{ product.description }}</p>
+            <a href="/" class="btn btn-primary mt-3">Назад к товарам</a>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h3>Отзывы</h3>
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="border rounded p-3 mb-3" style="background-color: rgba(255, 255, 255, 0.1);">
+                    <p><strong>{{ review.user_name }}</strong> ({{ review.date }}):</p>
+                    <p>{{ review.text }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Отзывов пока нет.</p>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+        <div class="mt-4">
+            <h4>Оставить отзыв</h4>
+            <form action="{{ url_for('add_review', product_id=product.id) }}" method="POST">
+                <div class="form-group">
+                    <textarea name="review_text" class="form-control" rows="4" placeholder="Напишите ваш отзыв..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Отправить</button>
+            </form>
+        </div>
+    {% else %}
+        <p class="mt-4">Пожалуйста, <a href="{{ url_for('login') }}">войдите</a>, чтобы оставить отзыв.</p>
+    {% endif %}
+</div>
+{% endblock %}

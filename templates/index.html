@@ -2,15 +2,32 @@
 
 {% block content %}
 <h1>Товары</h1>
-{% for item in products%}
-<div class="col-md6 border rounded">
-    <h2>{{item.name}}</h2>
-    <div>
-        {{item.description}}
+
+<form method="get" action="{{ url_for('index') }}" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Поиск товаров..." value="{{ request.args.get('search', '') }}">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">Поиск</button>
+        </div>
     </div>
-    <div>
-        Цена - {{item.price}}
-    </div>
+</form>
+
+<div class="row">
+    {% for item in products %}
+        <div class="col-md-4 mb-4">
+            <a href="{{ url_for('product_detail', product_id=item.id) }}" class="text-decoration-none">
+                <div class="card border-0 rounded product-card" style="background-color: rgba(255, 255, 255, 0.1); color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);">
+                    {% if item.image %}
+                        <img src="{{ item.image }}" alt="{{ item.name }}" class="card-img-top" style="height: 200px; object-fit: contain; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h2 class="card-title" style="color: #ffffff;">{{ item.name }}</h2>
+                        <p class="card-text" style="color: #e0e0e0;">{{ item.description | truncate(100) }}</p>
+                        <p class="text-warning">Цена: {{ item.price }} ₽</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
 </div>
-{% endfor %}
 {% endblock %}

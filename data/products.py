@@ -13,3 +13,4 @@ class Products(SqlAlchemyBase):
     name = sqlalchemy.Column(sqlalchemy.String)
     description = sqlalchemy.Column(sqlalchemy.String)
     price = sqlalchemy.Column(sqlalchemy.Float)
+    image = sqlalchemy.Column(sqlalchemy.String)
