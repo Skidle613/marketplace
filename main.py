@@ -1,14 +1,16 @@
 import datetime
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_login import LoginManager, logout_user, login_required, login_user, current_user
 from werkzeug.utils import redirect
 
+from sqlalchemy import func
 from data import db_sessions
 from data.users import User
 from data.products import Products
 from data.sellers import Seller
+from data.reviews import Reviews
 
 from forms.user import LoginForm as LoginForm_user, RegisterForm as RegisterForm_user
 from forms.seller import RegisterForm as RegisterForm_seller
@@ -34,9 +36,17 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
+    search_query = request.args.get('search', '').strip().lower()
     db_sess = db_sessions.create_session()
-    products = db_sess.query(Products).all()
-    return render_template("index.html", products=products)
+    if search_query:
+        products = db_sess.query(Products).filter(
+            (func.lower(Products.name).contains(search_query)) |
+            (func.lower(Products.description).contains(search_query))
+        ).all()
+    else:
+        products = db_sess.query(Products).all()
+
+    return render_template('index.html', products=products)
 
 
 @app.route('/logout')
@@ -101,7 +111,8 @@ def register_seller():
             score=5
         )
         db_sess.add(seller)
-        db_sess.query(User).filter(User.id == current_user.id).first().seller_id = db_sess.query(Seller).filter(Seller.user_id == current_user.id).first().id
+        db_sess.query(User).filter(User.id == current_user.id).first().seller_id = db_sess.query(Seller).filter(
+            Seller.user_id == current_user.id).first().id
         db_sess.commit()
         return redirect('/seller')
     return render_template('register_seller.html', title='Регистрация продавца', form=form)
@@ -128,13 +139,41 @@ def addproduct():
             seller_id=current_user.seller_id,
             name=form.product_name.data,
             description=form.description.data,
-            price=form.price.data
+            price=form.price.data,
+            image=form.image.data
         )
         db_sess = db_sessions.create_session()
         db_sess.add(product)
         db_sess.commit()
         return redirect('/seller')
     return render_template('product.html', title='Добавление товара', form=form)
+
+
+@app.route('/product/<int:product_id>')
+def product_detail(product_id):
+    db_sess = db_sessions.create_session()
+    product = db_sess.query(Products).filter(Products.id == product_id).first()
+    reviews = db_sess.query(Reviews).filter(Reviews.product_id == product.id).all()
+    if not product:
+        return redirect('/')
+    return render_template('product_details.html', product=product, reviews=reviews)
+
+
+@app.route('/add_review/<int:product_id>', methods=['POST'])
+@login_required
+def add_review(product_id):
+    db_sess = db_sessions.create_session()
+    review_text = request.form.get('review_text')
+    review = Reviews(
+        user_id=current_user.id,
+        product_id=product_id,
+        user_name=current_user.name,
+        date=datetime.date.today(),
+        text=review_text
+    )
+    db_sess.add(review)
+    db_sess.commit()
+    return redirect(f"/product/{product_id}")
 
 
 def main():
