@@ -13,13 +13,13 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     surname = sqlalchemy.Column(sqlalchemy.String)
     name = sqlalchemy.Column(sqlalchemy.String)
-    email = sqlalchemy.Column(sqlalchemy.String, unique=True)
+    email = sqlalchemy.Column(sqlalchemy.String)
     is_seller = sqlalchemy.Column(sqlalchemy.Boolean)
     seller_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('sellers.id'))
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
 
-    def set_password(self, password):
+    def set_password(self, password: str):
         self.hashed_password = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password: str):
         return check_password_hash(self.hashed_password, password)
