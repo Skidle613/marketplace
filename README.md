@@ -8,6 +8,7 @@
 4. Запустить файл main.py и открыть локальный сервер по выданным ip и порту
 # TestCoverage
 ![Coverage Status](https://coveralls.io/repos/github/Skidle613/marketplace/badge.svg?branch=development)
+
 # Используемые библиотеки
 SqlAlchemy\
 Flask\
