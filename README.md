@@ -7,7 +7,7 @@
 3. При необходимости очистить базу данных просто удалить соответствующий файл из папки "db/"
 4. Запустить файл main.py и открыть локальный сервер по выданным ip и порту
 # TestCoverage
-![Coverage Status]()
+![Coverage Status](https://coveralls.io/repos/github/Skidle613/marketplace/badge.svg?branch=development)
 
 # Используемые библиотеки
 SqlAlchemy\
