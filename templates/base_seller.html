@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{title}}</title>
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1f44, #00688b);
+            background-size: 200% 200%;
+            color: #ffffff;
+            animation: gradientAnimation 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.2); /* Полупрозрачный черный */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .navbar-brand, .navbar a, .navbar a:hover {
+            color: #ffffff !important;
+        }
+
+        .btn-primary, .btn-success {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .btn-primary:hover, .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        main.container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+        }
+
+        .product-card {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .product-card h2 {
+            color: #b0e0e6;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="/">Wildberries</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="btn btn-primary mr-2" href="/">Назад</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-success" href="/addproduct">Добавить товар</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<main role="main" class="container">
+<h1>Мои товары</h1>
+<div class="row">
+    {% for item in products %}
+        <div class="col-md-4 mb-4">
+            <a href="{{ url_for('product_detail', product_id=item.id) }}" class="text-decoration-none">
+                <div class="card border-0 rounded product-card" style="background-color: rgba(255, 255, 255, 0.1); color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);">
+
+                    {% if item.image %}
+                        <img src="{{ item.image }}" alt="{{ item.name }}" class="card-img-top" style="height: 200px; object-fit: contain; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h2 class="card-title" style="color: #ffffff;">{{ item.name }}</h2>
+                        <p class="card-text" style="color: #e0e0e0;">{{ item.description | truncate(100) }}</p>
+                        <p class="text-warning">Цена: {{ item.price }} ₽</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poTj3GXAm6ow5j6LrI6pi1M9j6j6jYj6M/1Nfo+Hx98GTEWep3F"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7/z1T59z3w4d2vL3m5SwgOi6Q5eiN/5gRBphVG5fK7EhGAmVRsXyyFROU9K/6MYd"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-w1QKOL/fQqlB9PJS3xk8OQ9xrN6Vu4yEzpChTW8q47wJ1ERjLe0y5AGjq0j0m6QK"
+        crossorigin="anonymous"></script>
+</body>
+</html>
