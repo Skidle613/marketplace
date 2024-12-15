@@ -1,7 +1,8 @@
 import datetime
 import os
 
-from flask import Flask, render_template, request
+import flask
+from flask import Flask, render_template, request, flash
 from flask_login import LoginManager, logout_user, login_required, login_user, current_user
 from werkzeug.utils import redirect
 
@@ -16,26 +17,35 @@ from forms.user import LoginForm as LoginForm_user, RegisterForm as RegisterForm
 from forms.seller import RegisterForm as RegisterForm_seller
 from forms.product import AddProduct
 
-# from flask_restful import Api
-# import users_resources
-
 app = Flask(__name__)
-# api = Api(app)
-# api.add_resource(users_resources.UserResource, '/api/v2/users/<int:id>')
-# api.add_resource(users_resources.UserListResource, '/api/v2/users')
 app.config['SECRET_KEY'] = 'secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(user_id: int) -> User:
+    """
+    Возвращает нужного пользователя по его id
+
+    Аргументы:
+    user_id (int): id пользователя
+
+    Возвращаемое значение:
+    User: пользователь в виде класса User, полученный из базы данных
+    """
     db_sess = db_sessions.create_session()
     return db_sess.query(User).get(user_id)
 
 
 @app.route('/')
-def index():
+def index() -> str:
+    """
+    Загружает главную страницу
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    """
     search_query = request.args.get('search', '').strip().lower()
     db_sess = db_sessions.create_session()
     if search_query:
@@ -51,13 +61,26 @@ def index():
 
 @app.route('/logout')
 @login_required
-def logout():
+def logout() -> flask.Response:
+    """
+    Загружает страницу выхода из аккаунта
+
+    Возвращаемое значение:
+    flask.Response: перебрасывает на главную страницу
+    """
     logout_user()
     return redirect("/")
 
 
 @app.route('/login', methods=['GET', 'POST'])
-def login():
+def login() -> str | flask.Response:
+    """
+    Загружает страницу входа в аккаунт
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    flask.Response: перебрасывает на главную страницу
+    """
     form = LoginForm_user()
     if form.validate_on_submit():
         db_sess = db_sessions.create_session()
@@ -70,10 +93,18 @@ def login():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def reqister() -> str | flask.Response:
+    """
+    Загружает страницу регистрации в аккаунт
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    flask.Response: перебрасывает на страницу входа в аккаунт
+    """
     form = RegisterForm_user()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
+            flash("Пароли не совпадают", "danger")
             return render_template('register.html', title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
@@ -97,7 +128,14 @@ def reqister():
 
 
 @app.route('/register_seller', methods=['GET', 'POST'])
-def register_seller():
+def register_seller() -> str | flask.Response:
+    """
+    Загружает страницу регистрации пользователя как продавца
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    flask.Response: перебрасывает на страницу продавца
+    """
     form = RegisterForm_seller()
     if form.validate_on_submit():
         db_sess = db_sessions.create_session()
@@ -119,7 +157,14 @@ def register_seller():
 
 
 @app.route('/seller')
-def seller():
+def seller() -> str | flask.Response:
+    """
+    Загружает страницу продавца
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    flask.Response: перебрасывает на страницу регистрации пользователя как продавца
+    """
     db_sess = db_sessions.create_session()
     seller_id = current_user.seller_id
     if seller_id != -1:
@@ -130,7 +175,14 @@ def seller():
 
 
 @app.route('/addproduct', methods=['GET', 'POST'])
-def addproduct():
+def addproduct() -> str | flask.Response:
+    """
+    Загружает страницу добавления нового продукта
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    flask.Response: перебрасывает на страницу продавца
+    """
     form = AddProduct()
     if current_user.seller_id == -1:
         return redirect('register_seller')
@@ -150,7 +202,17 @@ def addproduct():
 
 
 @app.route('/product/<int:product_id>')
-def product_detail(product_id):
+def product_detail(product_id: int) -> str | flask.Response:
+    """
+    Загружает страницу карточки товара
+
+    Аргументы:
+    product_id (int): id продукта
+
+    Возвращаемое значение:
+    str: загружает страничку: рендерит html и возвращает строковое значение
+    flask.Response: перебрасывает на главную страницу
+    """
     db_sess = db_sessions.create_session()
     product = db_sess.query(Products).filter(Products.id == product_id).first()
     reviews = db_sess.query(Reviews).filter(Reviews.product_id == product.id).all()
@@ -161,7 +223,16 @@ def product_detail(product_id):
 
 @app.route('/add_review/<int:product_id>', methods=['POST'])
 @login_required
-def add_review(product_id):
+def add_review(product_id: int) -> flask.Response:
+    """
+    Загружает страницу добавления отзыва о товаре
+
+    Аргументы:
+    product_id (int): id продукта
+
+    Возвращаемое значение:
+    flask.Response: перебрасывает на страницу товара
+    """
     db_sess = db_sessions.create_session()
     review_text = request.form.get('review_text')
     review = Reviews(
